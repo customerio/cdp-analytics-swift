@@ -6,7 +6,44 @@
 //
 
 import Foundation
+import JSONSafeEncoder
 
+extension JSONDecoder {
+    enum JSONDecodingError: Error {
+        case couldNotDecodeDate(String)
+    }
+
+    static var `default`: JSONDecoder {
+        let d = JSONDecoder()
+
+        d.dateDecodingStrategy = .custom({ decoder throws -> Date in
+            let stringDate = try decoder.singleValueContainer().decode(String.self)
+
+            guard let date = stringDate.iso8601() else {
+                throw JSONDecodingError.couldNotDecodeDate(stringDate)
+            }
+
+            return date
+        })
+
+        return d
+    }
+}
+
+extension JSONSafeEncoder {
+    static var `default`: JSONSafeEncoder {
+        let e = JSONSafeEncoder()
+
+        e.dateEncodingStrategy = .custom({ date, encoder in
+            let stringDate = date.iso8601()
+            var container = encoder.singleValueContainer()
+            try container.encode(stringDate)
+        })
+
+        e.nonConformingFloatEncodingStrategy = JSON.jsonNonConformingNumberStrategy
+        return e
+    }
+}
 
 // MARK: - JSON Definition
 
@@ -17,6 +54,8 @@ public enum JSON: Equatable {
     case string(String)
     case array([JSON])
     case object([String: JSON])
+    
+    static var jsonNonConformingNumberStrategy: JSONSafeEncoder.NonConformingFloatEncodingStrategy = .zero
     
     internal enum JSONError: Error {
         case unknown
@@ -35,7 +74,7 @@ public enum JSON: Equatable {
     
     // For Value types
     public init<T: Codable>(with value: T) throws {
-        let encoder = JSONEncoder.default
+        let encoder = JSONSafeEncoder.default
         let json = try encoder.encode(value)
         let output = try JSONSerialization.jsonObject(with: json)
         try self.init(output)
@@ -136,7 +175,7 @@ extension Encodable {
     public func toString(pretty: Bool) -> String {
         var returnString = ""
         do {
-            let encoder = JSONEncoder.default
+            let encoder = JSONSafeEncoder.default
             if pretty {
                 encoder.outputFormatting = .prettyPrinted
             }
