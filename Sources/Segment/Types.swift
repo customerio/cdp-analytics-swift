@@ -11,9 +11,9 @@ import Sovran
 // MARK: - Supplementary Types
 
 public struct DestinationMetadata: Codable {
-    var bundled: [String] = []
-    var unbundled: [String] = []
-    var bundledIds: [String] = []
+    public var bundled: [String] = []
+    public var unbundled: [String] = []
+    public var bundledIds: [String] = []
 }
 
 // MARK: - Event Types
