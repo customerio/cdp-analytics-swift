@@ -26,12 +26,10 @@ internal class iOSVendorSystem: VendorSystem {
     }
     
     override var type: String {
-        #if os(iOS)
+        #if os(iOS) || os(visionOS)
         return "ios"
         #elseif os(tvOS)
         return "tvos"
-        #elseif os(visionOS)
-        return "visionos"
         #elseif targetEnvironment(macCatalyst)
         return "macos"
         #else
