@@ -7,15 +7,14 @@ Pod::Spec.new do |s|
     s.authors = "Customer.io"
 
     # Make sure the tag is the same as what SPM customers are using.
-    # TODO: update it to version, once we decide to release it.
-    s.source = { :git => 'https://github.com/customerio/cdp-analytics-swift.git', :branch => 'shahroz/different-target' }
+    s.source = { :git => 'https://github.com/customerio/cdp-analytics-swift.git', :tag => '1.5.11+cio.1' }
 
     s.ios.deployment_target = "13.0"
     s.requires_arc = true
 
     s.swift_version = '5.3'
     s.cocoapods_version = '>= 1.11.0'
-    s.module_name = "CDPAnalyticsSwift"
+    s.module_name = "CioAnalytics"
 
     s.source_files = "Sources/**/*.swift"
     s.resource_bundles = {

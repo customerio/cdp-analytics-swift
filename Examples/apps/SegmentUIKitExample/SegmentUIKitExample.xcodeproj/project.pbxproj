@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		301A7CF42BB79195007AF8A5 /* CDPAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 301A7CF32BB79195007AF8A5 /* CDPAnalyticsSwift */; };
+		30678B7F2BE982DC000C3E2D /* CioAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 30678B7E2BE982DC000C3E2D /* CioAnalytics */; };
 		46022785261F860100A9E913 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46022784261F860100A9E913 /* AppDelegate.swift */; };
 		46022787261F860100A9E913 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46022786261F860100A9E913 /* SceneDelegate.swift */; };
 		46022789261F860100A9E913 /* Tab1ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46022788261F860100A9E913 /* Tab1ViewController.swift */; };
@@ -48,7 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				301A7CF42BB79195007AF8A5 /* CDPAnalyticsSwift in Frameworks */,
+				30678B7F2BE982DC000C3E2D /* CioAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,7 +138,7 @@
 			);
 			name = SegmentUIKitExample;
 			packageProductDependencies = (
-				301A7CF32BB79195007AF8A5 /* CDPAnalyticsSwift */,
+				30678B7E2BE982DC000C3E2D /* CioAnalytics */,
 			);
 			productName = SegmentUIKitExample;
 			productReference = 46022781261F860100A9E913 /* SegmentUIKitExample.app */;
@@ -439,9 +439,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		301A7CF32BB79195007AF8A5 /* CDPAnalyticsSwift */ = {
+		30678B7E2BE982DC000C3E2D /* CioAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = CDPAnalyticsSwift;
+			productName = CioAnalytics;
 		};
 		460227A0261F887C00A9E913 /* Segment */ = {
 			isa = XCSwiftPackageProductDependency;

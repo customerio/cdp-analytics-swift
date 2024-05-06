@@ -34,7 +34,7 @@
 
 import Foundation
 import UIKit
-import CDPAnalyticsSwift
+import CioAnalytics
 import AdSupport
 import AppTrackingTransparency
 

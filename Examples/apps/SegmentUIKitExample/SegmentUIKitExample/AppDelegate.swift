@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import CDPAnalyticsSwift
+import CioAnalytics
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
