@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name = "AnalyticsSwiftCIO"
-    s.version = "1.5.11+cio.1"
+    s.version = "1.5.12+cio.1"
     s.license = { :type => 'MIT', :file => './LICENSE' }
     s.summary = "Customer.io Data Pipelines analytics client for Swift app (iOS/tvOS/watchOS/macOS/Linux)."
     s.homepage = "https://github.com/customerio/cdp-analytics-swift"
@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
 
     # Make sure the tag is the same as what SPM customers are using.
     # update branch to version
-    s.source = { :git => 'https://github.com/customerio/cdp-analytics-swift.git', :branch => 'shahroz/different-target' }
+    s.source = { :git => 'https://github.com/customerio/cdp-analytics-swift.git', :tag => '1.5.12+cio.1' }
 
     s.ios.deployment_target = "13.0"
     s.requires_arc = true
