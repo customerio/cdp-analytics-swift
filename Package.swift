@@ -33,6 +33,7 @@ let package = Package(
                 .product(name: "Sovran", package: "sovran-swift"),
                 .product(name: "JSONSafeEncoding", package: "jsonsafeencoding-swift")
             ],
+            path: "Sources/Segment",   
             resources: [.process("Segment/Resources")]),
         .testTarget(
             name: "CioAnalytics-Tests",
