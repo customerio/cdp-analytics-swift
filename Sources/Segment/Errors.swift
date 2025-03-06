@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum AnalyticsError: Error {
+public indirect enum AnalyticsError: Error {
     case storageUnableToCreate(String)
     case storageUnableToWrite(String)
     case storageUnableToRename(String)
@@ -16,10 +16,10 @@ public enum AnalyticsError: Error {
     case storageInvalid(String)
     case storageUnknown(Error)
 
-    case networkUnexpectedHTTPCode(Int)
-    case networkServerLimited(Int)
-    case networkServerRejected(Int)
-    case networkUnknown(Error)
+    case networkUnexpectedHTTPCode(URL?, Int)
+    case networkServerLimited(URL?, Int)
+    case networkServerRejected(URL?, Int)
+    case networkUnknown(URL?, Error)
     case networkInvalidData
 
     case jsonUnableToSerialize(Error)
@@ -27,6 +27,11 @@ public enum AnalyticsError: Error {
     case jsonUnknown(Error)
 
     case pluginError(Error)
+
+    case enrichmentError(String)
+
+    case settingsFail(AnalyticsError)
+    case batchUploadFail(AnalyticsError)
 }
 
 extension Analytics {
@@ -68,6 +73,11 @@ extension Analytics {
         if fatal {
             exceptionFailure("A critical error occurred: \(translatedError)")
         }
+        Telemetry.shared.error(metric: Telemetry.INVOKE_ERROR_METRIC, log: Thread.callStackSymbols.joined(separator: "\n")) {
+            (_ it: inout [String: String]) in
+            it["error"] = "\(translatedError)"
+            it["writekey"] = configuration.values.writeKey
+        }
     }
     
     static public func reportInternalError(_ error: Error, fatal: Bool = false) {
@@ -77,6 +87,10 @@ extension Analytics {
         Self.segmentLog(message: "An internal error occurred: \(translatedError)", kind: .error)
         if fatal {
             exceptionFailure("A critical error occurred: \(translatedError)")
+        }
+        Telemetry.shared.error(metric: Telemetry.INVOKE_ERROR_METRIC, log: Thread.callStackSymbols.joined(separator: "\n")) { 
+            (_ it: inout [String: String]) in
+            it["error"] = "\(translatedError)"
         }
     }
 }

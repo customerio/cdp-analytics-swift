@@ -87,19 +87,28 @@ public class Analytics {
 
         // Get everything running
         platformStartup()
+
+        Telemetry.shared.increment(metric: Telemetry.INVOKE_METRIC) {it in 
+            it["message"] = "configured"
+            it["apihost"] = configuration.values.apiHost
+            it["cdnhost"] = configuration.values.cdnHost
+            it["flush"] =
+                "at:\(configuration.values.flushAt) int:\(configuration.values.flushInterval) pol:\(configuration.values.flushPolicies.count)"
+            it["config"] = "seg:\(configuration.values.autoAddSegmentDestination) ua:\(configuration.values.userAgent ?? "N/A")"
+        }
     }
     
     deinit {
         Self.removeActiveWriteKey(configuration.values.writeKey)
     }
 
-    internal func process<E: RawEvent>(incomingEvent: E) {
+    internal func process<E: RawEvent>(incomingEvent: E, enrichments: [EnrichmentClosure]? = nil) {
         guard enabled == true else { return }
-        let event = incomingEvent.applyRawEventData(store: store)
+        let event = incomingEvent.applyRawEventData(store: store, enrichments: enrichments)
 
         _ = timeline.process(incomingEvent: event)
 
-        let flushPolicies = configuration.values.flushPolicies
+        /*let flushPolicies = configuration.values.flushPolicies
         for policy in flushPolicies {
             policy.updateState(event: event)
 
@@ -107,6 +116,27 @@ public class Analytics {
                 flush()
                 policy.reset()
             }
+        }*/
+        
+        let flushPolicies = configuration.values.flushPolicies
+        
+        var shouldFlush = false
+        // if any policy says to flush, make note of that
+        for policy in flushPolicies {
+            policy.updateState(event: event)
+            if policy.shouldFlush() {
+                shouldFlush = true
+                // we don't need to updateState on any others since we're gonna reset it below.
+                break
+            }
+        }
+        // if we were told to flush do it.
+        if shouldFlush {
+            // reset all the policies if one decided to flush.
+            flushPolicies.forEach {
+                $0.reset()
+            }
+            flush()
         }
     }
 
@@ -386,8 +416,11 @@ extension Analytics {
 
         var jsonProperties: JSON? = nil
         if let json = try? JSON(options) {
-            jsonProperties = json
-            _ = try? jsonProperties?.add(value: url.absoluteString, forKey: "url")
+            do {
+                jsonProperties = try json.add(value: url.absoluteString, forKey: "url")
+            } catch {
+                jsonProperties = json
+            }
         } else {
             if let json = try? JSON(["url": url.absoluteString]) {
                 jsonProperties = json
