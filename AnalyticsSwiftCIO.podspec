@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = "13.0"
     s.requires_arc = true
 
-    s.swift_version = '5.3'
+    s.swift_version = '5.9'
     s.cocoapods_version = '>= 1.11.0'
     s.module_name = "CioAnalytics"
 
@@ -25,6 +25,6 @@ Pod::Spec.new do |s|
         "Segment_Privacy" => "Sources/Segment/Resources/PrivacyInfo.xcprivacy"
     }
 
-    s.dependency 'Sovran', '1.1.1'
+    s.dependency 'Sovran', '1.1.2'
     s.dependency 'JSONSafeEncoding', '2.0.0'
 end
