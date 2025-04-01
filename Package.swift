@@ -21,7 +21,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/segmentio/sovran-swift.git", exact: "1.1.1"),
+        .package(url: "https://github.com/segmentio/sovran-swift.git", exact: "1.1.2"),
         .package(url: "https://github.com/segmentio/jsonsafeencoding-swift.git", exact: "2.0.0")
     ],
     targets: [

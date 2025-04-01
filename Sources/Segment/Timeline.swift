@@ -29,7 +29,17 @@ public class Timeline {
         // apply .before and .enrichment types first ...
         let beforeResult = applyPlugins(type: .before, event: incomingEvent)
         // .enrichment here is akin to source middleware in the old analytics-ios.
-        let enrichmentResult = applyPlugins(type: .enrichment, event: beforeResult)
+        var enrichmentResult = applyPlugins(type: .enrichment, event: beforeResult)
+        
+        if let enrichments = enrichmentResult?.enrichments {
+            for closure in enrichments {
+                if let result = closure(enrichmentResult) as? E {
+                    enrichmentResult = result
+                } else {
+                    Analytics.reportInternalError(AnalyticsError.enrichmentError("The given enrichment attempted to change the event type!"))
+                }
+            }
+        }
         
         // once the event enters a destination, we don't want
         // to know about changes that happen there. those changes
@@ -55,10 +65,27 @@ public class Timeline {
 internal class Mediator {
     internal func add(plugin: Plugin) {
         plugins.append(plugin)
+        Telemetry.shared.increment(metric: Telemetry.INTEGRATION_METRIC) {
+            (_ it: inout [String: String]) in
+            it["message"] = "added"
+            if let plugin = plugin as? DestinationPlugin, !plugin.key.isEmpty {
+                it["plugin"] = "\(plugin.type)-\(plugin.key)"
+            } else {
+                it["plugin"] = "\(plugin.type)-\(String(describing: type(of: plugin)))"
+            }
+        }
     }
     
     internal func remove(plugin: Plugin) {
         plugins.removeAll { (storedPlugin) -> Bool in
+            Telemetry.shared.increment(metric: Telemetry.INTEGRATION_METRIC) {
+                (_ it: inout [String: String]) in
+                it["message"] = "removed"
+                if let plugin = plugin as? DestinationPlugin, !plugin.key.isEmpty {
+                    it["plugin"] = "\(plugin.type)-\(plugin.key)"
+                } else {
+                    it["plugin"] = "\(plugin.type)-\(String(describing: type(of: plugin)))"
+                }            }
             return plugin === storedPlugin
         }
     }
@@ -76,6 +103,14 @@ internal class Mediator {
                 } else {
                     result = plugin.execute(event: r)
                 }
+                Telemetry.shared.increment(metric: Telemetry.INTEGRATION_METRIC) {
+                    (_ it: inout [String: String]) in
+                    it["message"] = "event-\(r.type ?? "unknown")"
+                    if let plugin = plugin as? DestinationPlugin, !plugin.key.isEmpty {
+                        it["plugin"] = "\(plugin.type)-\(plugin.key)"
+                    } else {
+                        it["plugin"] = "\(plugin.type)-\(String(describing: type(of: plugin)))"
+                    }                }
             }
         }
         

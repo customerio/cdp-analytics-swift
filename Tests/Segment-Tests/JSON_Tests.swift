@@ -30,6 +30,7 @@ class JSONTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        Telemetry.shared.enable = false
     }
 
     override func tearDownWithError() throws {
@@ -37,7 +38,7 @@ class JSONTests: XCTestCase {
     }
 
     func testJSONBasic() throws {
-        let traits = try? JSON(["email": "blah@blah.com"])
+        let traits = try! JSON(["email": "blah@blah.com"])
         let userInfo = UserInfo(anonymousId: "1234", userId: "brandon", traits: traits, referrer: nil)
         
         let encoder = JSONSafeEncoder.default

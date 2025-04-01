@@ -2,6 +2,9 @@ import XCTest
 @testable import Segment
 
 final class Analytics_Tests: XCTestCase {
+    override func setUpWithError() throws {
+        Telemetry.shared.enable = false
+    }
 
     func testBaseEventCreation() {
         let analytics = Analytics(configuration: Configuration(writeKey: "test"))
@@ -275,6 +278,59 @@ final class Analytics_Tests: XCTestCase {
         XCTAssertTrue(token?.count == 32) // it's a uuid w/o the dashes.  36 becomes 32.
     }
 #endif
+    
+    func testOpenURL() {
+        let analytics = Analytics(configuration: Configuration(writeKey: "test"))
+        let outputReader = OutputReaderPlugin()
+        analytics.add(plugin: outputReader)
+
+        waitUntilStarted(analytics: analytics)
+        
+        let url = URL(string: "https://blah.com")!
+        
+        // you ain't got no options Lt. Dan!
+        analytics.openURL(url)
+        let urlEvent: TrackEvent? = outputReader.lastEvent as? TrackEvent
+        XCTAssertEqual(urlEvent?.properties?.dictionaryValue!["url"] as! String, "https://blah.com")
+        
+        // Anyway, like I was sayin' ...
+        let options = [
+            "Shrimp": [
+                "Description": "Fruit of the sea",
+                "CookingMethods": [
+                    "barbecue",
+                    "boil",
+                    "broil",
+                    "bake",
+                    "saute",
+                    "fried (implied)"
+                ],
+                "Types": [
+                    "shrimp kabobs",
+                    "shrimp gumbo",
+                    "pan fried",
+                    "deep fried",
+                    "stir fried",
+                    "pineapple shrimp",
+                    "lemon shrimp",
+                    "coconut shrimp",
+                    "pepper shrimp",
+                    "shrimp soup",
+                    "shrimp stew",
+                    "shrimp salad",
+                    "shrimp and potatoes",
+                    "shrimp burger",
+                    "shrimp sandwich",
+                    "That- that's about it"
+                ]
+            ]
+        ]
+        
+        analytics.openURL(url, options: options)
+        let urlOptionEvent: TrackEvent? = outputReader.lastEvent as? TrackEvent
+        XCTAssertEqual(urlOptionEvent?.properties?.dictionaryValue!["url"] as! String, "https://blah.com")
+        XCTAssertNotNil(urlOptionEvent?.properties?.dictionaryValue!["Shrimp"])
+    }
 
     func testTrack() {
         let analytics = Analytics(configuration: Configuration(writeKey: "test"))
@@ -291,11 +347,17 @@ final class Analytics_Tests: XCTestCase {
     }
 
     func testIdentify() {
+        Storage.hardSettingsReset(writeKey: "test")
         let analytics = Analytics(configuration: Configuration(writeKey: "test"))
         let outputReader = OutputReaderPlugin()
         analytics.add(plugin: outputReader)
 
         waitUntilStarted(analytics: analytics)
+        
+        // traits should be an empty object.
+        let currentTraits = analytics.traits()
+        XCTAssertNotNil(currentTraits)
+        XCTAssertTrue(currentTraits!.isEmpty == true)
 
         analytics.identify(userId: "brandon", traits: MyTraits(email: "blah@blah.com"))
 
@@ -303,9 +365,16 @@ final class Analytics_Tests: XCTestCase {
         XCTAssertTrue(identifyEvent?.userId == "brandon")
         let traits = identifyEvent?.traits?.dictionaryValue
         XCTAssertTrue(traits?["email"] as? String == "blah@blah.com")
+        
+        analytics.reset()
+        
+        let emptyTraits = analytics.traits()
+        XCTAssertNotNil(emptyTraits)
+        XCTAssertTrue(emptyTraits!.isEmpty == true)
     }
 
     func testUserIdAndTraitsPersistCorrectly() {
+        Storage.hardSettingsReset(writeKey: "test")
         let analytics = Analytics(configuration: Configuration(writeKey: "test"))
         let outputReader = OutputReaderPlugin()
         analytics.add(plugin: outputReader)
@@ -637,7 +706,7 @@ final class Analytics_Tests: XCTestCase {
             return request
         }.errorHandler { error in
             switch error {
-            case AnalyticsError.networkServerRejected(_):
+            case AnalyticsError.networkServerRejected(_, _):
                 // we expect this one; it's a bogus writekey
                 break;
             default:
@@ -958,6 +1027,29 @@ final class Analytics_Tests: XCTestCase {
         XCTAssertEqual(outputReader.lastEvent?.anonymousId, "blah-111")
         XCTAssertEqual(anonIdGenerator.currentId, "blah-111")
         XCTAssertEqual(outputReader.lastEvent?.anonymousId, anonIdGenerator.currentId)
+    }
+    
+    func testSingularEnrichment() throws {
+        let analytics = Analytics(configuration: Configuration(writeKey: "test"))
+        let outputReader = OutputReaderPlugin()
+        analytics.add(plugin: outputReader)
         
+        let addEventOrigin: EnrichmentClosure = { event in
+            return Context.insertOrigin(event: event, data: [
+                "type": "mobile"
+            ])
+        }
+        
+        analytics.track(name: "enrichment check pre startup", enrichments: [addEventOrigin])
+
+        waitUntilStarted(analytics: analytics)
+        
+        let trackEvent1: TrackEvent? = outputReader.lastEvent as? TrackEvent
+        XCTAssertEqual(trackEvent1?.context?.value(forKeyPath: "__eventOrigin.type"), "mobile")
+
+        analytics.track(name: "enrichment check", enrichments: [addEventOrigin])
+
+        let trackEvent2: TrackEvent? = outputReader.lastEvent as? TrackEvent
+        XCTAssertEqual(trackEvent2?.context?.value(forKeyPath: "__eventOrigin.type"), "mobile")
     }
 }
