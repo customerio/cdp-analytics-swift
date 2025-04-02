@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@354a1ad156761f5ee2b7b13fa8e09943a5e8d252 # v1.229.0
         with:
           ruby-version: 3.0
     
@@ -29,7 +29,7 @@ jobs:
 
       - name: Get current version
         id: previoustag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        uses: "WyriHaximus/github-action-get-previous-tag@04e8485ecb6487243907e330d522ff60f02283ce" # v1.4.0
         
       - name: Create GitHub Release
         uses: actions/create-release@v1
@@ -50,7 +50,7 @@ jobs:
           rm AnalyticsSwiftCIO.podspec.bak
 
       - name: Commit and push podspec
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
         with:
           commit_message: "Bump podspec version to ${{ github.event.inputs.tag }}"
           file_pattern: AnalyticsSwiftCIO.podspec
